@@ -1,21 +1,21 @@
-// This is the central component which wires everything together and will be rendered to the root element that 
+// This is the central component which wires everything together and will be rendered to the root element that
 // is specified in the html section of this file.
 const App = () => {
-    
+
     const width = 960;
     const height = 500;
     const dateHistogramSize = 0.2;
 
     // TODO 4.1: Setup a state using React.useState similar to what we did for loading the data.
-    
+
     // read world atlas data amd migrant data
     const worldAtlas = useWorldAtlas();
     const data = useData();
     // TODO 1.3: if the data was not loaded yet return an html element that indicates that the data is still loading.
     if (!worldAtlas || !data) {
-        return <div className="loading">Loading data…</div>;
+        return <div>Loading data…</div>;
     }
-    
+
     // TODO 4.1: define an accessor function that will be used when filtering the data. The function
     // 			 should extract the reported date of the incident.
 
@@ -30,14 +30,14 @@ const App = () => {
         <>
             <Introduction data={data} />
             <svg width={width} height={height}>
-                
-                // TODO 1.5: remove width and height from the world graticule component
-                <WorldGraticule/>
-                // TODO 2.1: add the countries element and pass it the world Atlas
-                // TODO 2.2: add the Bubbles element and pass it the data
-                // TODO 4.1: Pass the filtered data to bubbles
+
+                {/* TODO 1.5: remove width and height from the world graticule component */}
+                <WorldGraticule />
+                {/* TODO 2.1: add the countries element and pass it the world Atlas */}
+                {/* TODO 2.2: add the Bubbles element and pass it the data */}
+                {/* TODO 4.1: Pass the filtered data to bubbles */}
                 <g transform={`translate(0, ${height - dateHistogramSize * height})`}>
-                    // TODO 3.1: create a Histogram element and pass it the width and height
+                    {/* TODO 3.1: create a Histogram element and pass it the width and height */}
                 </g>
             </svg>
         </>
