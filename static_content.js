@@ -69,23 +69,29 @@ const WorldGraticule = () => {
 const Countries = ({ worldAtlas: { land, interiors } }) => {
   // A local projection/path so this component can render independently.
   // If you already have a shared projection/path, you can pass them down instead.
-  const projection = useMemo(() => geoNaturalEarth1(), []);
-  const path = useMemo(() => geoPath(projection), [projection]);
 
-  return (
-    // TODO 2.1: create a group with class name countries for styling that wraps the following JS scope
-    <g className="countries">
-      {/* TODO 2.1: create a react fragment */}
-      <>
-        {/* TODO 2.1: map the land features to path elements that draw the land masses */}
-        {land?.features?.map((feature, i) => (
-          <path key={`land-${i}`} className="land" d={path(feature)} />
-        ))}
+    const projection = d3.geoNaturalEarth1()
+        .scale(150) // Adjust scale
+        .translate([width / 2, height / 2]); // Center in viewport
 
-        {/* TODO 2.1: draw another path for the interiors */}
-        {interiors && <path className="interiors" d={path(interiors)} />}
-      </>
-    </g>
-  );
+    const pathGenerator = d3.geoPath().projection(projection);
+
+    return (
+        <svg width={width} height={height}>
+        <g className="countries">
+            {/* Render land masses */}
+            <path
+                className="land"
+                d={pathGenerator(land)}
+            />
+
+            {/* Render country borders */}
+            <path
+                className="interiors"
+                d={pathGenerator(interiors)}
+            />
+        </g>
+        </svg>
+    );
 };
 
