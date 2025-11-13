@@ -34,7 +34,9 @@ const App = () => {
                 {/* TODO 1.5: remove width and height from the world graticule component */}
                 <WorldGraticule />
                 {/* TODO 2.1: add the countries element and pass it the world Atlas */}
+                <Countries worldAtlas={worldAtlas}/>
                 {/* TODO 2.2: add the Bubbles element and pass it the data */}
+                <Bubbles data={data}/>
                 {/* TODO 4.1: Pass the filtered data to bubbles */}
                 <g transform={`translate(0, ${height - dateHistogramSize * height})`}>
                     {/* TODO 3.1: create a Histogram element and pass it the width and height */}
