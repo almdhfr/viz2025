@@ -2,92 +2,215 @@
 // TODO 3.1 and 3.2
 // --------------------------------------------------
 
-// TODO 3.2: create a AxisLeft component that takes the y scale, inner width and a tick offset
-    // TODO 3.2: on the y scale you can call the ticks() function which returns an array of tick positions
-    // TODO 3.2: we map the tick positions to a group element containing a line and a text
-        // TODO 3.2: create a group element with class name tick
-            // TODO 3.2: the key will be the tick value
-            // TODO 3.2: move the group to the right position using the transform of the group element
-            // TODO 3.2: now add the svg line element. Research which parameters it requires. Note that the y position is already correct due to the
-            // 			 transform we applied to the group
-            // TODO 3.2: add the text moved slightly to the left (use tick offset) 
-            // TODO 3.2: set the style attribute to  to make sure it aligns properly
-            // TODO 3.2: add the tick value as the text
+// TODO 3.2: AxisLeft component
+const AxisLeft = ({ yScale, innerWidth, tickOffset = 3 }) => (
+  <>
+    {yScale.ticks().map(tickValue => (
+      // TODO 3.2: create a group element with class name tick
+      <g
+        className="tick"
+        key={tickValue} // key will be the tick value
+        // move the group to the right position
+        transform={`translate(0, ${yScale(tickValue)})`}
+      >
+        {/* horizontal grid line */}
+        <line x2={innerWidth} />
+        {/* tick label slightly left of axis */}
+        <text
+          x={-tickOffset}
+          dy="0.32em"
+          style={{ textAnchor: "end" }} // align properly on the right
+        >
+          {tickValue}
+        </text>
+      </g>
+    ))}
+  </>
+);
 
-// TODO 3.2: add the bottom axis in the same way as the axis left. You will need the innerHeight to specify for positioning the text and line
-// TODO 3.2: the textAnchor style for the text should be middle now
+// TODO 3.2: bottom axis
+const AxisBottom = ({
+  xScale,
+  innerHeight,
+  tickOffset = 3,
+  tickFormat = d => d
+}) => (
+  <>
+    {xScale.ticks().map(tickValue => (
+      <g
+        className="tick"
+        key={tickValue}
+        transform={`translate(${xScale(tickValue)}, 0)`}
+      >
+        <line y2={innerHeight} />
+        <text
+          y={innerHeight + tickOffset}
+          dy="0.71em"
+          style={{ textAnchor: "middle" }} // centered textAnchor
+        >
+          {tickFormat(tickValue)}
+        </text>
+      </g>
+    ))}
+  </>
+);
 
-// TODO 3.2: create a Bars component and add parameter when you need them for the following todos
-    // TODO 3.2: map each binned data entry to a rectangle
-            // TODO 3.2: className should be bar
-            // TODO 3.2: key is the index
-            // TODO 3.2: all of the following must be passed through x scale or y scale
-            // TODO 3.2: x coordinate is the beginning of the bar on the x axis
-            // TODO 3.2: y coordinate is the top height of each bar (keep in mind that the origin of the coordinate system is in the top left)
-            // TODO 3.2: width of a bar should be the difference between start and end date of each bar
-            // TODO 3.2: height must be the inner height minus the height of the bar
+// TODO 3.2: Bars component
+const Bars = ({ binnedData, xScale, yScale, innerHeight }) => (
+  <>
+    {binnedData.map((bin, i) => (
+      <rect
+        className="bar"                   // className bar
+        key={i}                           // key is the index
+        x={xScale(bin.x0)}                // beginning of bar on x-axis
+        y={yScale(bin.y)}                 // top height of bar
+        width={Math.max(0, xScale(bin.x1) - xScale(bin.x0))} // width = end - start
+        height={innerHeight - yScale(bin.y)} // innerHeight minus bar height
+      />
+    ))}
+  </>
+);
 
+// TODO 3.1: accessor for total number of dead and missing migrants
+const yValue = d => d["Total Dead and Missing"];
 
-// TODO 3.1: Define an accessor function called yValue to access the total number of dead and missing migrants 
-// 			 ("Total Dead and Missing") from the original data table.
-// TODO 3.2: Define variables containing the text of your y axis label (we won't define an x axis label)
+// TODO 3.2: y axis label text
+const yAxisLabel = "Total Dead and Missing";
+
 // variables for the offset of the axis label
 const yAxisLabelOffset = 30;
 // margin (small gaps on the sides of the bar chart)
 const margin = { top: 0, right: 30, bottom: 20, left: 45 };
 // TODO 3.2: Define a time format using d3.timeFormat
+const xAxisTickFormat = d3.timeFormat("%b %Y");
 
 // TODO 4.1: brush extent setter as parameter
-const Histogram = ({width, height}) => {
-    // TODO 3.1: compute innerHeight and innerWidth by subtracting the margins from width and height. If
-    // 			you replace width and height in the placeholder rectangle below you will see it shrinking but
-    // 			move to the wrong place. We will take care of that later
-    // TODO 3.1: Define an accessor function (xValue) to access the date of the incident ("Reported Date") from
-    // 			 the orignal data table.
+const Histogram = ({ width, height, data, setBrushExtent }) => {
+  // Guard so we never crash if data is not there yet
+  if (!data) {
+    return null;
+  }
 
-    // TODO 3.1: define the xScale using d3.scaleTime
-            // TODO 3.1: domain from min to max value of data. u can use d3.extent
-            // TODO 3.1: the range starts at zero and ends at inner width
-            // TODO 3.1: call nice to make it nice numbers for labeling		
-    // TODO 4.2: Memoization for scale
-    
-    // TODO 3.1: grab the start and end from the domain
+  // TODO 3.1: compute innerHeight and innerWidth by subtracting the margins
+  const innerWidth = width - margin.left - margin.right;
+  const innerHeight = height - margin.top - margin.bottom;
 
-    // TODO 3.1: aggregate the data into bins you can find a detailed description in the pdf
-    // TODO 4.2: Memoization for the binned data
-    
-    // TODO 3.2: use scaleLinear to define the scale of the y value in the bar chart (requires computation of binned data first)
-            // TODO 3.2: domain starts a zero and ends at maximum (d3.max) of binned data
-            // TODO 3.2: range is up to inner height
-    // TODO 4.2: Memoization for scale
-    
-    // TODO 4.1: D3 provides a horizontal brush object called d3.brushX that can be manipulated interactively. The brush 
-    // 			 element itself is a part of the DOM, i.e., it is a graphical element.  For manipulation of DOM elements 
-    // 			 through JSX, we need a reference to them. use React.useRef() to create a const brushRef
-    // TODO 4.1: When loading the data we used React.useEffect to ensure that the code was only executed once and performing
-    // 			 side effects. We want do the same here to setup the brush and create a side effect of the brush which will 
-    // 			 call the setter of brush extent that we passed in earlier.
-    // TODO 4.1: the useEffect function requires a list of dependencies. Think about what variables the function depends on.
-        // TODO 4.1: setup the brush using d3.brushX() and set its extent. assign it to a variable called brush
-        // TODO 4.1: connect the brush with the group element by calling brush() on the group element (use d3.select())
-        // TODO 4.1: add an event listener to the brush which listens for the "brush end" event. inside set the brush extent. 
-        //  		 You have to invert the selection by mapping the selection using xScale.invert
-    
-    return (
-        <>
-            // TODO 3.2: delete the placeholder rectangle
-            <rect width={width} height={height} fill="none" stroke="#d95f02" strokeWidth="3"/>
-            // TODO 3.2: return a width by height, filled, white rectangle as the background 
-            // TODO 3.2: create a group element which transforms everything inside it by the margins for top and left
-                // TODO 3.2: When you finished the AxisLeft component, add it here and pass the necessary data. 
-                // TODO 3.2: Experiment with the tick offset to find a good value.
-                // TODO 3.2: When you finished the AxisBottom component, add it here and pass the necessary data. 
-                // TODO 3.2: Experiment with the tick offset to find a good value.
-                // TODO 3.2: When you finished the Bars component, add it here and pass the necessary data. 
-                // TODO 3.2: Add a text element which contains your y axis label. Give it the class name axis-label and use 'middle' as 
-                //			 the text anchor. The text should be rotated by 90 degrees and positioned to the left of the axis. The best
-                // 			 way to do so is to use the transform attribute of the text element.
-                // TODO 4.1: add a group element with attrbute ref being the previously defined reference to the brus
-        </>
-        )
+  // TODO 3.1: accessor for date of incident
+  const xValue = d => d["Reported Date"];
+
+  // TODO 3.1: define the xScale using d3.scaleTime
+  const xScale = React.useMemo(
+    () =>
+      d3
+        .scaleTime()
+        // domain from min to max value of data (d3.extent)
+        .domain(d3.extent(data, xValue))
+        // range from 0 to innerWidth
+        .range([0, innerWidth])
+        // nice numbers for labeling
+        .nice(),
+    // TODO 4.2: Memoization dependencies for scale
+    [data, innerWidth]
+  );
+
+  // TODO 3.1: grab the start and end from the domain
+  const [start, stop] = xScale.domain();
+
+  // TODO 3.1: aggregate the data into bins
+  const binnedData = React.useMemo(() => {
+    const bin = d3
+      .bin()
+      .value(xValue)
+      .domain([start, stop])
+      .thresholds(30); // number of bins
+
+    return bin(data).map(bin => ({
+      x0: bin.x0,
+      x1: bin.x1,
+      y: d3.sum(bin, yValue) // sum of deaths per bin
+    }));
+  }, [data, start, stop]); // TODO 4.2: Memoization for the binned data
+
+  // TODO 3.2: y scale based on binned data
+  const yScale = React.useMemo(
+    () =>
+      d3
+        .scaleLinear()
+        // domain from 0 to maximum of binned data
+        .domain([0, d3.max(binnedData, d => d.y) || 0])
+        // range from innerHeight (bottom) to 0 (top)
+        .range([innerHeight, 0])
+        .nice(),
+    [binnedData, innerHeight] // TODO 4.2: Memoization for scale
+  );
+
+  // TODO 4.1: create a const brushRef
+  const brushRef = React.useRef(null);
+
+  // TODO 4.1: setup brush and side effect
+  React.useEffect(() => {
+    if (!brushRef.current) return;
+
+    // TODO 4.1: setup the brush using d3.brushX() and set its extent
+    const brush = d3
+      .brushX()
+      .extent([[0, 0], [innerWidth, innerHeight]])
+      .on("brush end", event => {
+        const selection = event.selection;
+        if (!selection) {
+          // if brush is cleared, reset filter
+          setBrushExtent && setBrushExtent(null);
+          return;
+        }
+        // TODO 4.1: invert the selection using xScale.invert
+        const [x0, x1] = selection.map(xScale.invert);
+        setBrushExtent && setBrushExtent([x0, x1]);
+      });
+
+    // connect the brush with the group element
+    d3.select(brushRef.current).call(brush);
+  }, [innerWidth, innerHeight, xScale, setBrushExtent]); // dependencies
+
+  return (
+    <>
+      {/* TODO 3.2: background rectangle */}
+      <rect width={width} height={height} fill="white" />
+
+      {/* TODO 3.2: group translated by margins */}
+      <g transform={`translate(${margin.left},${margin.top})`}>
+        {/* TODO 3.2: AxisLeft */}
+        <AxisLeft yScale={yScale} innerWidth={innerWidth} tickOffset={5} />
+
+        {/* TODO 3.2: AxisBottom */}
+        <AxisBottom
+          xScale={xScale}
+          innerHeight={innerHeight}
+          tickOffset={5}
+          tickFormat={xAxisTickFormat}
+        />
+
+        {/* TODO 3.2: Bars */}
+        <Bars
+          binnedData={binnedData}
+          xScale={xScale}
+          yScale={yScale}
+          innerHeight={innerHeight}
+        />
+
+        {/* TODO 3.2: y axis label */}
+        <text
+          className="axis-label"
+          textAnchor="middle"
+          transform={`translate(${-yAxisLabelOffset},${
+            innerHeight / 2
+          }) rotate(-90)`}
+        >
+          {yAxisLabel}
+        </text>
+
+        {/* TODO 4.1: group element with ref for brush */}
+        <g ref={brushRef} />
+      </g>
+    </>
+  );
 };
