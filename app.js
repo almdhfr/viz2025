@@ -7,7 +7,7 @@ const App = () => {
     const dateHistogramSize = 0.2;
 
     // TODO 4.1: Setup a state using React.useState similar to what we did for loading the data.
-
+    const setBrushExtent = React.useState(null);
     // read world atlas data amd migrant data
     const worldAtlas = useWorldAtlas();
     const data = useData();
@@ -40,6 +40,12 @@ const App = () => {
                 {/* TODO 4.1: Pass the filtered data to bubbles */}
                 <g transform={`translate(0, ${height - dateHistogramSize * height})`}>
                     {/* TODO 3.1: create a Histogram element and pass it the width and height */}
+                    <Histogram
+                        width={width}
+                        height={dateHistogramSize * height}
+                        data={data}
+                        setBrushExtent={setBrushExtent}
+                    />
                 </g>
             </svg>
         </>
